@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MovieDetailFragment">
+    tools:context=".ui.moviedetails.MovieDetailFragment">
 
     <FrameLayout
         android:id="@+id/frameLayout2"
@@ -76,7 +76,6 @@
         android:drawablePadding="8dp"
         android:gravity="center"
         android:textColor="@color/white"
-        app:drawableInt="@color/white"
         app:drawableStartCompat="@drawable/ic_baseline_star_border_24"
         app:layout_constraintStart_toStartOf="@+id/txt_release"
         app:layout_constraintTop_toTopOf="@+id/cardView2"
@@ -90,7 +89,6 @@
         android:drawablePadding="8dp"
         android:gravity="center"
         android:textColor="@color/white"
-        app:drawableInt="@color/white"
         app:drawableStartCompat="@drawable/ic_baseline_calendar_today_24"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/cardView2"
@@ -105,7 +103,6 @@
         android:drawablePadding="8dp"
         android:gravity="center"
         android:textColor="@color/white"
-        app:drawableInt="@color/white"
         app:drawableStartCompat="@drawable/ic_baseline_language_24"
         app:layout_constraintStart_toStartOf="@+id/txt_release"
         app:layout_constraintTop_toBottomOf="@+id/txt_release"
