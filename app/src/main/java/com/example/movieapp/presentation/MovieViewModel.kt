@@ -3,13 +3,14 @@ package com.example.movieapp.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.liveData
+import androidx.lifecycle.viewModelScope
 import com.example.movieapp.core.Resource
 import com.example.movieapp.repository.MovieRepository
 import kotlinx.coroutines.Dispatchers
 
 class MovieViewModel(private val repo: MovieRepository): ViewModel() {
 
-    fun fetchUpcomingMovies() = liveData(Dispatchers.IO) {
+    fun fetchUpcomingMovies() = liveData(viewModelScope.coroutineContext + Dispatchers.Main) {
         emit(Resource.Loading())
         try {
             emit(Resource.Success(repo.getUpcomingMovies()))
@@ -18,7 +19,7 @@ class MovieViewModel(private val repo: MovieRepository): ViewModel() {
         }
     }
 
-    fun fetchPopularMovies() = liveData(Dispatchers.IO) {
+    fun fetchPopularMovies() = liveData(viewModelScope.coroutineContext + Dispatchers.IO) {
         emit(Resource.Loading())
         try {
             emit(Resource.Success(repo.getPopularMovies()))
@@ -27,7 +28,7 @@ class MovieViewModel(private val repo: MovieRepository): ViewModel() {
         }
     }
 
-    fun fetchTopRatedMovies() = liveData(Dispatchers.IO) {
+    fun fetchTopRatedMovies() = liveData(viewModelScope.coroutineContext + Dispatchers.IO) {
         emit(Resource.Loading())
         try {
             emit(Resource.Success(repo.getTopRatedMovies()))

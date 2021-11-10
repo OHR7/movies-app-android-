@@ -6,66 +6,132 @@ import androidx.fragment.app.Fragment
 import android.view.View
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.ConcatAdapter
 import com.example.movieapp.R
 import com.example.movieapp.core.Resource
+import com.example.movieapp.data.model.Movie
 import com.example.movieapp.data.remote.MovieDataSource
 import com.example.movieapp.databinding.FragmentMovieBinding
+import com.example.movieapp.databinding.TopRatedMovieRowBinding
 import com.example.movieapp.presentation.MovieViewModel
 import com.example.movieapp.presentation.MovieViewModelFactory
 import com.example.movieapp.repository.MovieRepositoryImpl
 import com.example.movieapp.repository.RetrofitClient
+import com.example.movieapp.ui.movie.adapters.MovieAdapter
+import com.example.movieapp.ui.movie.adapters.concat.PopularConcatAdapter
+import com.example.movieapp.ui.movie.adapters.concat.TopRatedConcatAdapter
+import com.example.movieapp.ui.movie.adapters.concat.UpcomingConcatAdapter
 
-class MovieFragment : Fragment(R.layout.fragment_movie) {
+class MovieFragment : Fragment(R.layout.fragment_movie), MovieAdapter.OnMovieClickLListener {
 
     private lateinit var binding: FragmentMovieBinding
-    private val viewModel by viewModels<MovieViewModel> { MovieViewModelFactory(MovieRepositoryImpl(
-        MovieDataSource(RetrofitClient.webservice)
-    )) }
+    private val viewModel by viewModels<MovieViewModel> {
+        MovieViewModelFactory(
+            MovieRepositoryImpl(
+                MovieDataSource(RetrofitClient.webservice)
+            )
+        )
+    }
+
+    private lateinit var concatAdapter: ConcatAdapter
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         binding = FragmentMovieBinding.bind(view)
 
-        viewModel.fetchUpcomingMovies().observe(viewLifecycleOwner, Observer {  result ->
-            when(result) {
+        concatAdapter = ConcatAdapter()
+
+        viewModel.fetchUpcomingMovies().observe(viewLifecycleOwner, Observer { result ->
+            when (result) {
                 is Resource.Loading -> {
-                    Log.d("liveData", "Loading...")
+                    binding.progressBar.visibility = View.VISIBLE
                 }
                 is Resource.Success -> {
-                    Log.d("liveData", "${result.data}")
+                    binding.progressBar.visibility = View.GONE
+                    concatAdapter.apply {
+                        addAdapter(
+                            0,
+                            UpcomingConcatAdapter(
+                                MovieAdapter(
+                                    result.data.results,
+                                    this@MovieFragment
+                                )
+                            )
+                        )
+                    }
+                    binding.rvMovies.adapter = concatAdapter
                 }
                 is Resource.Failure -> {
-                    Log.d("Error", "${result.exception}")
+                    binding.progressBar.visibility = View.GONE
                 }
             }
         })
 
-        viewModel.fetchPopularMovies().observe(viewLifecycleOwner, Observer {  result ->
-            when(result) {
-                is Resource.Loading -> {
-                    Log.d("liveData", "Loading...")
-                }
-                is Resource.Success -> {
-                    Log.d("liveData", "${result.data}")
-                }
-                is Resource.Failure -> {
-                    Log.d("Error", "${result.exception}")
-                }
-            }
-        })
+//        viewModel.fetchPopularMovies().observe(viewLifecycleOwner, Observer { result ->
+//            when (result) {
+//                is Resource.Loading -> {
+//                    Log.d("liveData", "Loading...")
+//                }
+//                is Resource.Success -> {
+//                    binding.progressBar.visibility = View.GONE
+//                    concatAdapter.apply {
+//                        addAdapter(
+//                            1,
+//                            PopularConcatAdapter(
+//                                MovieAdapter(
+//                                    result.data.results,
+//                                    this@MovieFragment
+//                                )
+//                            )
+//                        )
+//                    }
+//                    binding.rvMovies.adapter = concatAdapter
+//                }
+//                is Resource.Failure -> {
+//                    Log.d("Error", "${result.exception}")
+//                }
+//            }
+//        })
+//
+//        viewModel.fetchTopRatedMovies().observe(viewLifecycleOwner, Observer { result ->
+//            when (result) {
+//                is Resource.Loading -> {
+//                    Log.d("liveData", "Loading...")
+//                }
+//                is Resource.Success -> {
+//                    binding.progressBar.visibility = View.GONE
+//                    concatAdapter.apply {
+//                        addAdapter(
+//                            2,
+//                            TopRatedConcatAdapter(
+//                                MovieAdapter(
+//                                    result.data.results,
+//                                    this@MovieFragment
+//                                )
+//                            )
+//                        )
+//                    }
+//                    binding.rvMovies.adapter = concatAdapter
+//                }
+//                is Resource.Failure -> {
+//                    Log.d("Error", "${result.exception}")
+//                }
+//            }
+//        })
+    }
 
-        viewModel.fetchTopRatedMovies().observe(viewLifecycleOwner, Observer {  result ->
-            when(result) {
-                is Resource.Loading -> {
-                    Log.d("liveData", "Loading...")
-                }
-                is Resource.Success -> {
-                    Log.d("liveData", "${result.data}")
-                }
-                is Resource.Failure -> {
-                    Log.d("Error", "${result.exception}")
-                }
-            }
-        })
+    override fun onMovieClick(movie: Movie) {
+        val action = MovieFragmentDirections.actionMovieFragmentToMovieDetailFragment(
+            movie.poster_path,
+            movie.backdrop_path,
+            movie.vote_average.toFloat(),
+            movie.vote_count,
+            movie.overview,
+            movie.title,
+            movie.original_language,
+            movie.release_date
+        )
+        findNavController().navigate(action)
     }
 }
